@@ -13,33 +13,33 @@ import java.util.*;
  */
 public class Client {
 
-    private static final int PORTA = 5000;
+    private static final int PORTA = 5000;  //porta sulla quale il server è in ascolto
 
     public static void main(String[] args) throws IOException {
-        String host = (args.length > 0) ? args[0] : "localhost";
+        String host = (args.length > 0) ? args[0] : "localhost"; // indirizzo del server. per riga di comando si usa la prima opzione, altrimenti si usa localhost
 
         System.out.print("Il tuo nome: ");
         String nome = new Scanner(System.in).nextLine().trim();
-        if (nome.isEmpty()) nome = "Giocatore";
+        if (nome.isEmpty()) nome = "Giocatore"; // nome di default se l'utente non lo mette
 
-        try (Socket socket = new Socket(host, PORTA);
-             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-             PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+        try (Socket socket = new Socket(host, PORTA); // connesione al server
+             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream())); // legge le righe di testo inviate al server
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {  //scrive righe verso il server
 
-            out.println("NOME " + nome);
+            out.println("NOME " + nome); //mi presento al sever
 
-            Cartella cartella = null;
-            Set<Integer> segnati = new HashSet<>();
+            Cartella cartella = null; // la cartella arrivera' dal server
+            Set<Integer> segnati = new HashSet<>(); // numeri della MIA cartella gia' usciti
             Set<String> premiGestiti = new HashSet<>(); // gia' vinti da qualcuno o gia' richiesti da me
 
             String riga;
-            while ((riga = in.readLine()) != null) {
+            while ((riga = in.readLine()) != null) { //leggo un messaggio alla volta finche' il server non chiude, (readLine() restituisce null quando la connessione viene chiusa)
                 String[] p = riga.split(" ", 2);
                 String comando = p[0];
                 String dati = (p.length > 1) ? p[1] : "";
 
-                switch (comando) {
-                    case "CARTELLA":
+                switch (comando) { // Gestisco il messaggio in base al comando ricevuto
+                    case "CARTELLA": // Il server mi assegna la cartella 
                         cartella = Cartella.daStringa(dati);
                         System.out.println("La tua cartella:");
                         System.out.print(cartella.disegna(segnati));
