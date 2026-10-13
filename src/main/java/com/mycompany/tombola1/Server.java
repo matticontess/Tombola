@@ -22,23 +22,23 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class Server {
 
-    private static final int PORTA = 5000;
-    private static final int PAUSA_MS = 2000;
+    private static final int PORTA = 5000;  //porta su cui il client si metterà in comunicazione
+    private static final int PAUSA_MS = 2000; //tempo di pausa del server dopo l'estrazione
 
-    private final List<GestoreClient> clients = new CopyOnWriteArrayList<>();
-    private final Set<Integer> estratti = new LinkedHashSet<>();      // il tabellone
+    private final List<GestoreClient> clients = new CopyOnWriteArrayList<>(); //lista dinamica di client che si collegano al server
+    private final Set<Integer> estratti = new LinkedHashSet<>();      // tabellone dei numeri estratti, inizalmente pieno di punti (.) poi riempito coi numeri
     private final Map<String, String> vincitori = new LinkedHashMap<>(); // premio -> nome
-    private final Random rnd = new Random();
-    private volatile boolean finita = false;
+    private final Random rnd = new Random();  //generatore di numeri randomici
+    private volatile boolean finita = false; //controlla se la partita è finita
 
     public static void main(String[] args) throws Exception {
-        new Server().avvia();
+        new Server().avvia(); //si fa partire il server
     }
 
     private void avvia() throws Exception {
-        ServerSocket ss = new ServerSocket(PORTA);
+        ServerSocket ss = new ServerSocket(PORTA); //il server si mette in ascolto sulla porta definita
 
-        // Thread che accetta le connessioni per tutta la partita
+        // thread che accetta le connessioni
         Thread accettatore = new Thread(() -> {
             while (!ss.isClosed()) {
                 try {
@@ -48,22 +48,22 @@ public class Server {
                 }
             }
         });
-        accettatore.setDaemon(true);
-        accettatore.start();
+        accettatore.setDaemon(true); //permette di far andare in background il thread finchè non termina
+        accettatore.start(); //viene fatto partire il thread che accetta
 
         System.out.println("Server in ascolto sulla porta " + PORTA);
         System.out.println("Premi INVIO per iniziare l'estrazione...");
-        new Scanner(System.in).nextLine();
+        new Scanner(System.in).nextLine(); //se si preme enter parte l'estrazione
 
-        List<Integer> sacchetto = new ArrayList<>();
-        for (int i = 1; i <= 90; i++) sacchetto.add(i);
-        Collections.shuffle(sacchetto, rnd);
+        List<Integer> sacchetto = new ArrayList<>(); //lista che contiene i numeri
+        for (int i = 1; i <= 90; i++) sacchetto.add(i); //inserimento dei numeri nella lista
+        Collections.shuffle(sacchetto, rnd); //mette in ordine randomico i numeri nella lista
 
-        for (int n : sacchetto) {
+        for (int n : sacchetto) { //viene fatta l'estrazione dei numeri
             synchronized (this) {
                 if (finita) break;
                 estratti.add(n);
-                broadcast("NUMERO " + n);
+                broadcast("NUMERO " + n); //dice a tutti i client il numero estratto
                 System.out.println("\nEstratto: " + n);
                 stampaTabellone();
             }
@@ -78,7 +78,7 @@ public class Server {
         }
 
         System.out.println("\n=== RISULTATI ===");
-        vincitori.forEach((premio, nome) -> System.out.println(premio + ": " + nome));
+        vincitori.forEach((premio, nome) -> System.out.println(premio + ": " + nome)); //per ogni vincitore viene scritto il premio e il nome
         ss.close();
     }
 
