@@ -82,9 +82,11 @@ public class Server {
         ss.close();
     }
 
-    /** Verifica una richiesta di vincita: il server non si fida del client. */
+    //classe che verifica le vincite
     private synchronized void verifica(GestoreClient g, String premio) {
-        if (finita) return;
+        if (finita) return; //se lapartita è finita esce
+
+        //controlla se il premio c'è, è già stato assegnato oppure se non è valido
 
         if (!Arrays.asList(Cartella.PREMI).contains(premio)) {
             g.invia("RIFIUTATA " + premio + " premio sconosciuto");
@@ -112,9 +114,9 @@ public class Server {
 
     private void broadcast(String msg) {
         for (GestoreClient g : clients) g.invia(msg);
-    }
+    } //invia ad ogni user il messaggio
 
-    private void stampaTabellone() {
+    private void stampaTabellone() {   //costruisce una stringa con i numeri estratti
         StringBuilder sb = new StringBuilder();
         for (int i = 1; i <= 90; i++) {
             sb.append(estratti.contains(i) ? String.format("%3d", i) : "  .");
